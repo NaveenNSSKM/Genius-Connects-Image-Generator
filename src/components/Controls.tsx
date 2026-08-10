@@ -486,7 +486,29 @@ export const Controls: React.FC<ControlsProps> = ({
             </label>
 
             <div className="grid grid-cols-2 gap-3">
-              {/* Preset 1: Royal Violet CTA */}
+              {/* Preset 1: Reference Cyan Glow */}
+              <button
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    bgType: "reference",
+                    bgColor1: "#c4f1f9",
+                    bgColor2: "#a7f3d0",
+                  })
+                }
+                className={`group flex flex-col p-2.5 rounded-xl border transition-all text-center ${
+                  settings.bgType === "reference"
+                    ? "border-purple-500 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/30"
+                    : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-slate-400"
+                }`}
+              >
+                <div className="w-full h-12 rounded-lg bg-gradient-to-tr from-cyan-200 via-teal-200 to-yellow-100 border border-slate-200/60 shadow-inner mb-2" />
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                  Reference Cyan Glow
+                </span>
+              </button>
+
+              {/* Preset 2: Royal Violet CTA */}
               <button
                 onClick={() =>
                   setSettings({
@@ -506,7 +528,7 @@ export const Controls: React.FC<ControlsProps> = ({
               >
                 <div className="w-full h-12 rounded-lg bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-500 border border-slate-200/60 shadow-inner mb-2" />
                 <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">
-                  Royal Violet (CTA Theme)
+                  Royal Violet
                 </span>
               </button>
 
