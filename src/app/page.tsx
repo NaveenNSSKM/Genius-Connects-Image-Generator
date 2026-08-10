@@ -18,10 +18,10 @@ export default function Home() {
     bannerBgColor: "#ffffff",
     bannerOpacity: 0.95,
     bannerHeight: 110,
-    bgType: "reference",
-    bgColor1: "#c4f1f9",
-    bgColor2: "#a7f3d0",
-    bgColor3: "#bae6fd",
+    bgType: "gradient",
+    bgColor1: "#4f46e5",
+    bgColor2: "#8b5cf6",
+    bgColor3: "#a855f7",
     gradientAngle: 135,
     personScale: 1.15,
     personOffsetX: 0,
@@ -185,10 +185,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-teal-500 selection:text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/20 to-indigo-50/30 text-slate-900 flex flex-col selection:bg-purple-600 selection:text-white">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 bg-teal-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2 text-sm font-semibold animate-bounce">
+        <div className="fixed top-5 right-5 z-50 bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-500 text-white px-5 py-3 rounded-2xl shadow-xl shadow-purple-500/30 flex items-center gap-2 text-sm font-semibold animate-bounce">
           <CheckCircle2 className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>
@@ -207,11 +207,11 @@ export default function Home() {
                 onError={() => setLogoLoadError(true)}
               />
             ) : (
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-cyan-400 flex items-center justify-center shadow-md shadow-teal-500/25 p-2">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-violet-500 flex items-center justify-center shadow-md shadow-purple-500/30 p-2">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 3C12 7.97056 16.0294 12 21 12C16.0294 12 12 16.0294 12 21C12 16.0294 7.97056 12 3 12C7.97056 12 12 7.97056 12 3Z" stroke="#042f2e" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M19 4V7M17.5 5.5H20.5" stroke="#042f2e" strokeWidth="2" strokeLinecap="round"/>
-                  <circle cx="6" cy="18" r="1.8" fill="#042f2e"/>
+                  <path d="M12 3C12 7.97056 16.0294 12 21 12C16.0294 12 12 16.0294 12 21C12 16.0294 7.97056 12 3 12C7.97056 12 12 7.97056 12 3Z" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M19 4V7M17.5 5.5H20.5" stroke="#ffffff" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="6" cy="18" r="1.8" fill="#ffffff"/>
                 </svg>
               </div>
             )}
@@ -225,7 +225,7 @@ export default function Home() {
 
           <button
             onClick={handleDownloadPNG}
-            className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-all shadow-md shadow-teal-500/20"
+            className="bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-500 hover:from-indigo-700 hover:to-violet-600 text-white font-bold px-6 py-2.5 rounded-full text-sm flex items-center gap-2 transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/45 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Export </span>

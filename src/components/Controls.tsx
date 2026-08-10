@@ -69,7 +69,7 @@ export const Controls: React.FC<ControlsProps> = ({
           onClick={() => setActiveTab("upload")}
           className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all ${
             activeTab === "upload"
-              ? "bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-300 shadow-sm"
+              ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-purple-300 shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
           }`}
         >
@@ -81,7 +81,7 @@ export const Controls: React.FC<ControlsProps> = ({
           onClick={() => setActiveTab("text")}
           className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all ${
             activeTab === "text"
-              ? "bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-300 shadow-sm"
+              ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-purple-300 shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
           }`}
         >
@@ -93,7 +93,7 @@ export const Controls: React.FC<ControlsProps> = ({
           onClick={() => setActiveTab("cutout")}
           className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all ${
             activeTab === "cutout"
-              ? "bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-300 shadow-sm"
+              ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-purple-300 shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
           }`}
         >
@@ -105,7 +105,7 @@ export const Controls: React.FC<ControlsProps> = ({
           onClick={() => setActiveTab("background")}
           className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg transition-all ${
             activeTab === "background"
-              ? "bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-300 shadow-sm"
+              ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-purple-300 shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
           }`}
         >
@@ -119,14 +119,14 @@ export const Controls: React.FC<ControlsProps> = ({
         {/* TAB 1: UPLOAD */}
         {activeTab === "upload" && (
           <div className="space-y-5 animate-fade-in flex-1">
-            <label className="group relative flex flex-col items-center justify-center border-2 border-dashed border-teal-500/40 hover:border-teal-500 bg-teal-50/30 dark:bg-teal-950/20 hover:bg-teal-50/60 rounded-2xl p-8 cursor-pointer transition-all text-center">
+            <label className="group relative flex flex-col items-center justify-center border-2 border-dashed border-purple-500/40 hover:border-purple-500 bg-purple-50/30 dark:bg-purple-950/20 hover:bg-purple-50/60 rounded-2xl p-8 cursor-pointer transition-all text-center">
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
                 onChange={handleFileChange}
               />
-              <div className="w-14 h-14 rounded-full bg-teal-100 dark:bg-teal-900/60 text-teal-600 dark:text-teal-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <Upload className="w-7 h-7" />
               </div>
               <p className="font-semibold text-slate-800 dark:text-slate-200">
@@ -140,9 +140,9 @@ export const Controls: React.FC<ControlsProps> = ({
             <button
               onClick={onRemoveBackground}
               disabled={isRemovingBg}
-              className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-teal-500/20 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-500 hover:from-indigo-700 hover:to-violet-600 text-white font-bold py-3.5 px-6 rounded-full shadow-lg shadow-purple-500/30 hover:shadow-purple-500/45 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
             >
-              <Wand2 className="w-4 h-4" />
+              <Wand2 className="w-5 h-5" />
               <span>{isRemovingBg ? "AI Extracting Cutout..." : " Background Remover"}</span>
             </button>
           </div>
@@ -159,7 +159,7 @@ export const Controls: React.FC<ControlsProps> = ({
               rows={3}
               value={settings.announcementText}
               onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm"
               placeholder="e.g. Enter your heading"
             />
           </div>
@@ -171,7 +171,7 @@ export const Controls: React.FC<ControlsProps> = ({
             <select
               value={settings.fontFamily}
               onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm cursor-pointer"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm cursor-pointer"
             >
               <option value="Lexend Deca">Lexend Deca (Default - Modern Tech)</option>
               <option value="Helvetica Neue">Helvetica Neue (Classic Minimal)</option>
@@ -199,7 +199,7 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) =>
                   setSettings({ ...settings, titleFontSize: Number(e.target.value) })
                 }
-                className="w-full accent-teal-500"
+                className="w-full accent-purple-600"
               />
             </div>
 
@@ -215,7 +215,7 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) =>
                   setSettings({ ...settings, bannerHeight: Number(e.target.value) })
                 }
-                className="w-full accent-teal-500"
+                className="w-full accent-purple-600"
               />
             </div>
           </div>
@@ -262,18 +262,18 @@ export const Controls: React.FC<ControlsProps> = ({
       {activeTab === "cutout" && (
         <div className="space-y-4 animate-fade-in">
           {/* Interactive Eraser Brush Toggle */}
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl flex flex-col gap-2">
+          <div className="p-3 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/50 rounded-xl flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                <Eraser className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-xs font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                <Eraser className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 Interactive Canvas Eraser Brush
               </span>
               <button
                 onClick={() => setIsEraserMode(!isEraserMode)}
-                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
                   isEraserMode
-                    ? "bg-emerald-600 text-white shadow-md"
-                    : "bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 border border-emerald-300"
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-purple-500/25"
+                    : "bg-white dark:bg-slate-800 text-purple-700 dark:text-purple-300 border border-purple-300"
                 }`}
               >
                 {isEraserMode ? "Eraser Active (Click Poster)" : "Enable Eraser Brush"}
@@ -281,7 +281,7 @@ export const Controls: React.FC<ControlsProps> = ({
             </div>
             {isEraserMode && (
               <div>
-                <label className="flex items-center justify-between text-[11px] text-emerald-700 dark:text-emerald-300 mb-1">
+                <label className="flex items-center justify-between text-[11px] text-purple-700 dark:text-purple-300 mb-1">
                   <span>Eraser Size ({eraserBrushSize}px)</span>
                 </label>
                 <input
@@ -290,9 +290,9 @@ export const Controls: React.FC<ControlsProps> = ({
                   max="100"
                   value={eraserBrushSize}
                   onChange={(e) => setEraserBrushSize(Number(e.target.value))}
-                  className="w-full accent-emerald-500"
+                  className="w-full accent-purple-600"
                 />
-                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1">
+                <p className="text-[11px] text-purple-600 dark:text-purple-400 mt-1">
                   Click and rub directly over head or hair edges on the canvas to erase white halo artifacts!
                 </p>
               </div>
@@ -303,7 +303,7 @@ export const Controls: React.FC<ControlsProps> = ({
             <div>
               <label className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 <span className="flex items-center gap-1">
-                  <ZoomIn className="w-3.5 h-3.5 text-teal-500" /> Person Scale
+                  <ZoomIn className="w-3.5 h-3.5 text-purple-500" /> Person Scale
                 </span>
                 <span>{settings.personScale.toFixed(2)}x</span>
               </label>
@@ -316,14 +316,14 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) =>
                   setSettings({ ...settings, personScale: parseFloat(e.target.value) })
                 }
-                className="w-full accent-teal-500"
+                className="w-full accent-purple-600"
               />
             </div>
 
             <div>
               <label className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 <span className="flex items-center gap-1">
-                  <MoveVertical className="w-3.5 h-3.5 text-teal-500" /> Vertical Position
+                  <MoveVertical className="w-3.5 h-3.5 text-purple-500" /> Vertical Position
                 </span>
                 <span>{settings.personOffsetY}px</span>
               </label>
@@ -336,7 +336,7 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) =>
                   setSettings({ ...settings, personOffsetY: parseInt(e.target.value) })
                 }
-                className="w-full accent-teal-500"
+                className="w-full accent-purple-600"
               />
             </div>
           </div>
@@ -345,7 +345,7 @@ export const Controls: React.FC<ControlsProps> = ({
             <div>
               <label className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 <span className="flex items-center gap-1">
-                  <MoveHorizontal className="w-3.5 h-3.5 text-teal-500" /> Horizontal Offset
+                  <MoveHorizontal className="w-3.5 h-3.5 text-purple-500" /> Horizontal Offset
                 </span>
                 <span>{settings.personOffsetX}px</span>
               </label>
@@ -358,14 +358,14 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) =>
                   setSettings({ ...settings, personOffsetX: parseInt(e.target.value) })
                 }
-                className="w-full accent-teal-500"
+                className="w-full accent-purple-600"
               />
             </div>
 
             <div>
               <label className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 <span className="flex items-center gap-1">
-                  <Layers className="w-3.5 h-3.5 text-teal-500" /> Cutout Drop Shadow
+                  <Layers className="w-3.5 h-3.5 text-purple-500" /> Cutout Drop Shadow
                 </span>
                 <span>{settings.shadowBlur}px</span>
               </label>
@@ -378,7 +378,7 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) =>
                   setSettings({ ...settings, shadowBlur: parseInt(e.target.value) })
                 }
-                className="w-full accent-teal-500"
+                className="w-full accent-purple-600"
               />
             </div>
           </div>
@@ -387,7 +387,7 @@ export const Controls: React.FC<ControlsProps> = ({
             <div>
               <label className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 <span className="flex items-center gap-1">
-                  <Sun className="w-3.5 h-3.5 text-teal-500" /> Brightness
+                  <Sun className="w-3.5 h-3.5 text-purple-500" /> Brightness
                 </span>
                 <span>{settings.personBrightness}%</span>
               </label>
@@ -400,14 +400,14 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) =>
                   setSettings({ ...settings, personBrightness: parseInt(e.target.value) })
                 }
-                className="w-full accent-teal-500"
+                className="w-full accent-purple-600"
               />
             </div>
 
             <div>
               <label className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                 <span className="flex items-center gap-1">
-                  <Sliders className="w-3.5 h-3.5 text-teal-500" /> Contrast
+                  <Sliders className="w-3.5 h-3.5 text-purple-500" /> Contrast
                 </span>
                 <span>{settings.personContrast}%</span>
               </label>
@@ -420,14 +420,14 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) =>
                   setSettings({ ...settings, personContrast: parseInt(e.target.value) })
                 }
-                className="w-full accent-teal-500"
+                className="w-full accent-purple-600"
               />
             </div>
           </div>
 
           <div>
             <label className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+              <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-semibold">
                 <Scissors className="w-3.5 h-3.5" /> Trim Top Head Artifacts (Arc Removal)
               </span>
               <span>{settings.topCrop}%</span>
@@ -441,16 +441,16 @@ export const Controls: React.FC<ControlsProps> = ({
               onChange={(e) =>
                 setSettings({ ...settings, topCrop: parseInt(e.target.value) })
               }
-              className="w-full accent-emerald-500"
+              className="w-full accent-purple-600"
             />
           </div>
 
           {onAutoCleanHead && (
             <button
               onClick={onAutoCleanHead}
-              className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-emerald-500/20 transition-all"
+              className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-500 hover:from-indigo-700 hover:to-violet-600 text-white py-3 px-5 rounded-full text-xs font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-purple-500/25 transition-all"
             >
-              <Sparkles className="w-4 h-4 text-emerald-200" />
+              <Sparkles className="w-4 h-4 text-purple-200" />
               <span>Auto-Remove Top Background Fixture / Lamp Protrusion</span>
             </button>
           )}
@@ -468,7 +468,7 @@ export const Controls: React.FC<ControlsProps> = ({
                 topCrop: 0,
               })
             }
-            className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 py-2.5 rounded-full text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Reset Position & Filters</span>
@@ -486,25 +486,27 @@ export const Controls: React.FC<ControlsProps> = ({
             </label>
 
             <div className="grid grid-cols-2 gap-3">
-              {/* Preset 1: Reference Cyan Glow */}
+              {/* Preset 1: Royal Violet CTA */}
               <button
                 onClick={() =>
                   setSettings({
                     ...settings,
-                    bgType: "reference",
-                    bgColor1: "#c4f1f9",
-                    bgColor2: "#a7f3d0",
+                    bgType: "gradient",
+                    bgColor1: "#4f46e5",
+                    bgColor2: "#8b5cf6",
+                    bgColor3: "#a855f7",
+                    gradientAngle: 135,
                   })
                 }
                 className={`group flex flex-col p-2.5 rounded-xl border transition-all text-center ${
-                  settings.bgType === "reference"
-                    ? "border-teal-500 bg-teal-500/10 shadow-sm ring-2 ring-teal-500/30"
+                  settings.bgType === "gradient" && settings.bgColor1 === "#4f46e5"
+                    ? "border-purple-500 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/30"
                     : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-slate-400"
                 }`}
               >
-                <div className="w-full h-12 rounded-lg bg-gradient-to-tr from-cyan-200 via-teal-200 to-yellow-100 border border-slate-200/60 shadow-inner mb-2" />
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400">
-                  Reference Cyan Glow
+                <div className="w-full h-12 rounded-lg bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-500 border border-slate-200/60 shadow-inner mb-2" />
+                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                  Royal Violet (CTA Theme)
                 </span>
               </button>
 
@@ -633,7 +635,7 @@ export const Controls: React.FC<ControlsProps> = ({
 
           {/* CUSTOM BACKGROUND COLORS */}
           <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-3">
-            <label className="block text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
+            <label className="block text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
               CUSTOM BACKGROUND COLORS
             </label>
 
@@ -683,7 +685,7 @@ export const Controls: React.FC<ControlsProps> = ({
       <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-3">
         <button
           onClick={onDownloadPNG}
-          className="flex-1 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600 hover:from-teal-600 hover:to-emerald-600 text-white font-semibold py-3.5 px-5 rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-all flex items-center justify-center gap-2 group text-sm"
+          className="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-500 hover:from-indigo-700 hover:to-violet-600 text-white font-bold py-3.5 px-6 rounded-full shadow-lg shadow-purple-500/30 hover:shadow-purple-500/45 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group text-sm"
         >
           <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
           <span>Download High-Res PNG</span>
@@ -691,7 +693,7 @@ export const Controls: React.FC<ControlsProps> = ({
 
         <button
           onClick={onCopyImage}
-          className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold py-3.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center gap-2 text-sm"
+          className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-3.5 px-6 rounded-full border border-slate-200 dark:border-slate-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
         >
           <Copy className="w-4 h-4" />
           <span>Copy Image</span>
