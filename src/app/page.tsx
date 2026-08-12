@@ -9,6 +9,7 @@ import { CheckCircle2, Download } from "lucide-react";
 
 export default function Home() {
   const [settings, setSettings] = useState<PosterCanvasSettings>({
+    layoutMode: "classic",
     announcementText: "",
     fontFamily: "Lexend Deca",
     titleFontSize: 28,

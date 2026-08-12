@@ -255,6 +255,23 @@ export const Controls: React.FC<ControlsProps> = ({
               </div>
             </div>
           </div>
+
+          <div className="pt-2">
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 flex justify-between">
+              <span>Banner Card Opacity</span>
+              <span className="font-bold text-purple-600 dark:text-purple-400">{Math.round(settings.bannerOpacity * 100)}%</span>
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={Math.round(settings.bannerOpacity * 100)}
+              onChange={(e) =>
+                setSettings({ ...settings, bannerOpacity: Number(e.target.value) / 100 })
+              }
+              className="w-full accent-purple-600 cursor-pointer"
+            />
+          </div>
         </div>
       )}
 
@@ -479,6 +496,80 @@ export const Controls: React.FC<ControlsProps> = ({
       {/* TAB 4: TEMPLATE & BACKGROUND STYLING */}
       {activeTab === "background" && (
         <div className="space-y-6 animate-fade-in">
+          {/* Poster Layout Options */}
+          <div>
+            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3">
+              Poster Layout
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              {/* Option 1: Classic (Bottom Banner) */}
+              <button
+                onClick={() => setSettings({ ...settings, layoutMode: "classic" })}
+                className={`flex flex-col items-center justify-between p-3 rounded-xl border transition-all text-center ${
+                  !settings.layoutMode || settings.layoutMode === "classic"
+                    ? "border-purple-600 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/20"
+                    : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-slate-400"
+                }`}
+              >
+                <div className="w-full aspect-[16/10] bg-slate-200 dark:bg-slate-700 rounded-lg flex flex-col justify-end p-1 border border-slate-300 dark:border-slate-600 mb-2">
+                  <div className="w-1/3 h-1/2 bg-slate-400 dark:bg-slate-500 rounded mx-auto mb-1" />
+                  <div className="w-full h-2 bg-slate-600 dark:bg-slate-400 rounded-xs" />
+                </div>
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                  Bottom Banner
+                </span>
+              </button>
+
+              {/* Option 2: Left Image, Right Text */}
+              <button
+                onClick={() => setSettings({ ...settings, layoutMode: "left-image" })}
+                className={`flex flex-col items-center justify-between p-3 rounded-xl border transition-all text-center ${
+                  settings.layoutMode === "left-image"
+                    ? "border-purple-600 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/20"
+                    : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-slate-400"
+                }`}
+              >
+                <div className="w-full aspect-[16/10] bg-slate-200 dark:bg-slate-700 rounded-lg flex p-1 border border-slate-300 dark:border-slate-600 gap-1 mb-2">
+                  <div className="w-1/2 h-full bg-slate-400 dark:bg-slate-500 rounded flex items-end justify-center">
+                    <div className="w-2/3 h-4/5 bg-slate-500 dark:bg-slate-600 rounded-t" />
+                  </div>
+                  <div className="w-1/2 h-full flex flex-col justify-center gap-1.5 p-0.5">
+                    <div className="w-full h-1 bg-slate-600 dark:bg-slate-400 rounded-xs" />
+                    <div className="w-5/6 h-1 bg-slate-600 dark:bg-slate-400 rounded-xs" />
+                    <div className="w-2/3 h-1 bg-slate-600 dark:bg-slate-400 rounded-xs" />
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                  Left Image
+                </span>
+              </button>
+
+              {/* Option 3: Right Image, Left Text */}
+              <button
+                onClick={() => setSettings({ ...settings, layoutMode: "right-image" })}
+                className={`flex flex-col items-center justify-between p-3 rounded-xl border transition-all text-center ${
+                  settings.layoutMode === "right-image"
+                    ? "border-purple-600 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/20"
+                    : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-slate-400"
+                }`}
+              >
+                <div className="w-full aspect-[16/10] bg-slate-200 dark:bg-slate-700 rounded-lg flex p-1 border border-slate-300 dark:border-slate-600 gap-1 mb-2">
+                  <div className="w-1/2 h-full flex flex-col justify-center gap-1.5 p-0.5">
+                    <div className="w-full h-1 bg-slate-600 dark:bg-slate-400 rounded-xs" />
+                    <div className="w-5/6 h-1 bg-slate-600 dark:bg-slate-400 rounded-xs" />
+                    <div className="w-2/3 h-1 bg-slate-600 dark:bg-slate-400 rounded-xs" />
+                  </div>
+                  <div className="w-1/2 h-full bg-slate-400 dark:bg-slate-500 rounded flex items-end justify-center">
+                    <div className="w-2/3 h-4/5 bg-slate-500 dark:bg-slate-600 rounded-t" />
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                  Right Image
+                </span>
+              </button>
+            </div>
+          </div>
+
           {/* Template Preset Options */}
           <div>
             <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3">

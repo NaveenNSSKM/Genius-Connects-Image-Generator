@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 
 export interface PosterCanvasSettings {
+  // Layout mode
+  layoutMode?: "classic" | "left-image" | "right-image";
   // Text content
   announcementText: string;
   // Typography
@@ -143,12 +145,23 @@ export const PosterCanvas: React.FC<PosterCanvasProps> = ({
 
       ctx.filter = `brightness(${settings.personBrightness}%) contrast(${settings.personContrast}%)`;
 
-      const baseScale = Math.min(width / personImg.width, (height * 0.8) / personImg.height);
+      const isSplitLayout = settings.layoutMode === "left-image" || settings.layoutMode === "right-image";
+      const maxWidth = isSplitLayout ? width / 2 : width;
+      const maxHeight = isSplitLayout ? height * 0.9 : height * 0.8;
+      const baseScale = Math.min(maxWidth / personImg.width, maxHeight / personImg.height);
       const scaledW = personImg.width * baseScale * settings.personScale;
       const scaledH = personImg.height * baseScale * settings.personScale;
 
-      const x = (width - scaledW) / 2 + settings.personOffsetX;
-      const y = (height - scaledH) / 2 + settings.personOffsetY + 20;
+      let x = (width - scaledW) / 2 + settings.personOffsetX;
+      let y = (height - scaledH) / 2 + settings.personOffsetY + 20;
+
+      if (settings.layoutMode === "left-image") {
+        x = (width * 0.25 - scaledW / 2) + settings.personOffsetX;
+        y = height - scaledH + settings.personOffsetY;
+      } else if (settings.layoutMode === "right-image") {
+        x = (width * 0.75 - scaledW / 2) + settings.personOffsetX;
+        y = height - scaledH + settings.personOffsetY;
+      }
 
       if (settings.shadowBlur > 0) {
         ctx.shadowColor = settings.shadowColor;
@@ -182,61 +195,18 @@ export const PosterCanvas: React.FC<PosterCanvasProps> = ({
       ctx.restore();
     }
 
-    // 3. DRAW BOTTOM WHITE ANNOUNCEMENT BANNER
-    const bHeight = settings.bannerHeight;
-    const bY = height - bHeight;
-
-    ctx.save();
-    ctx.fillStyle = settings.bannerBgColor;
-    ctx.globalAlpha = settings.bannerOpacity;
-    ctx.fillRect(0, bY, width, bHeight);
-    ctx.restore();
-
-    ctx.save();
-    ctx.strokeStyle = "rgba(226, 232, 240, 0.8)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, bY);
-    ctx.lineTo(width, bY);
-    ctx.stroke();
-    ctx.restore();
-
-    // 4. DRAW SPARKLE (Disabled by default)
-    if (settings.showSparkle) {
-      ctx.save();
-      const sparkX = width - 80;
-      const sparkY = bY - 20;
-      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-      ctx.shadowColor = "rgba(255, 255, 255, 0.9)";
-      ctx.shadowBlur = 10;
-
-      ctx.beginPath();
-      ctx.moveTo(sparkX, sparkY - 18);
-      ctx.quadraticCurveTo(sparkX, sparkY, sparkX + 18, sparkY);
-      ctx.quadraticCurveTo(sparkX, sparkY, sparkX, sparkY + 18);
-      ctx.quadraticCurveTo(sparkX, sparkY, sparkX - 18, sparkY);
-      ctx.quadraticCurveTo(sparkX, sparkY, sparkX, sparkY - 18);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // 5. DRAW BANNER TEXT
-    ctx.save();
-    ctx.fillStyle = settings.textColor;
-    ctx.textAlign = settings.textAlignment;
-    ctx.textBaseline = "middle";
-
-    const textX =
-      settings.textAlignment === "center"
-        ? width / 2
-        : settings.textAlignment === "left"
-        ? 60
-        : width - 60;
-
+    // 3. CALCULATE TEXT WRAPPING & CARD DIMENSIONS
     const fullText = settings.announcementText.trim();
+    ctx.save();
     ctx.font = `600 ${settings.titleFontSize}px ${settings.fontFamily}, sans-serif`;
 
-    const maxTextWidth = width - 120;
+    const isSplitLayout = settings.layoutMode === "left-image" || settings.layoutMode === "right-image";
+    
+    // Width of the banner/card
+    const cardWidth = isSplitLayout ? 500 : width;
+    const cardPaddingX = isSplitLayout ? 45 : 60;
+    const maxTextWidth = cardWidth - cardPaddingX * 2;
+
     const words = fullText.split(" ");
     let line = "";
     const lines: string[] = [];
@@ -255,7 +225,127 @@ export const PosterCanvas: React.FC<PosterCanvasProps> = ({
 
     const lineHeight = settings.titleFontSize * 1.25;
     const totalTextHeight = lines.length * lineHeight;
-    let startY = bY + (bHeight - totalTextHeight) / 2 + lineHeight / 2;
+    ctx.restore();
+
+    // 4. DRAW TEXT BANNER / PANEL / CARD
+    ctx.save();
+    ctx.fillStyle = settings.bannerBgColor;
+    ctx.globalAlpha = settings.bannerOpacity;
+    
+    if (isSplitLayout) {
+      // Draw a beautiful floating banner card for split layouts
+      const cardHeight = Math.max(160, totalTextHeight + 90);
+      const centerX = settings.layoutMode === "left-image" ? width * 0.75 : width * 0.25;
+      const cardX = centerX - cardWidth / 2;
+      const cardY = (height - cardHeight) / 2;
+      const radius = 24;
+
+      // Add a nice soft shadow to the banner card
+      ctx.shadowColor = "rgba(15, 23, 42, 0.18)";
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetY = 10;
+      ctx.shadowOffsetX = 0;
+
+      // Draw rounded card path
+      ctx.beginPath();
+      ctx.moveTo(cardX + radius, cardY);
+      ctx.lineTo(cardX + cardWidth - radius, cardY);
+      ctx.quadraticCurveTo(cardX + cardWidth, cardY, cardX + cardWidth, cardY + radius);
+      ctx.lineTo(cardX + cardWidth, cardY + cardHeight - radius);
+      ctx.quadraticCurveTo(cardX + cardWidth, cardY + cardHeight, cardX + cardWidth - radius, cardY + cardHeight);
+      ctx.lineTo(cardX + radius, cardY + cardHeight);
+      ctx.quadraticCurveTo(cardX, cardY + cardHeight, cardX, cardY + cardHeight - radius);
+      ctx.lineTo(cardX, cardY + radius);
+      ctx.quadraticCurveTo(cardX, cardY, cardX + radius, cardY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Draw subtle light border to make the banner stand out
+      ctx.shadowColor = "transparent"; // disable shadow for border
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.22)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } else {
+      // Bottom banner
+      const bHeight = settings.bannerHeight;
+      const bY = height - bHeight;
+      ctx.fillRect(0, bY, width, bHeight);
+
+      // Bottom banner border line
+      ctx.strokeStyle = "rgba(226, 232, 240, 0.8)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, bY);
+      ctx.lineTo(width, bY);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 5. DRAW SPARKLE (Disabled by default)
+    if (settings.showSparkle) {
+      ctx.save();
+      let sparkX = width - 80;
+      let sparkY = height - settings.bannerHeight - 20;
+      
+      if (settings.layoutMode === "left-image") {
+        sparkX = width * 0.75 + 180;
+        sparkY = 60;
+      } else if (settings.layoutMode === "right-image") {
+        sparkX = width * 0.25 + 180;
+        sparkY = 60;
+      }
+      
+      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.shadowColor = "rgba(255, 255, 255, 0.9)";
+      ctx.shadowBlur = 10;
+
+      ctx.beginPath();
+      ctx.moveTo(sparkX, sparkY - 18);
+      ctx.quadraticCurveTo(sparkX, sparkY, sparkX + 18, sparkY);
+      ctx.quadraticCurveTo(sparkX, sparkY, sparkX, sparkY + 18);
+      ctx.quadraticCurveTo(sparkX, sparkY, sparkX - 18, sparkY);
+      ctx.quadraticCurveTo(sparkX, sparkY, sparkX, sparkY - 18);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 6. DRAW BANNER TEXT
+    ctx.save();
+    ctx.fillStyle = settings.textColor;
+    ctx.textAlign = settings.textAlignment;
+    ctx.textBaseline = "middle";
+
+    let textX = width / 2;
+    if (isSplitLayout) {
+      const centerX = settings.layoutMode === "left-image" ? width * 0.75 : width * 0.25;
+      const cardX = centerX - cardWidth / 2;
+      textX =
+        settings.textAlignment === "center"
+          ? centerX
+          : settings.textAlignment === "left"
+          ? cardX + cardPaddingX
+          : cardX + cardWidth - cardPaddingX;
+    } else {
+      textX =
+        settings.textAlignment === "center"
+          ? width / 2
+          : settings.textAlignment === "left"
+          ? 60
+          : width - 60;
+    }
+
+    ctx.font = `600 ${settings.titleFontSize}px ${settings.fontFamily}, sans-serif`;
+
+    let startY = 0;
+    if (isSplitLayout) {
+      const cardHeight = Math.max(160, totalTextHeight + 90);
+      const cardY = (height - cardHeight) / 2;
+      startY = cardY + (cardHeight - totalTextHeight) / 2 + lineHeight / 2;
+    } else {
+      const bHeight = settings.bannerHeight;
+      const bY = height - bHeight;
+      startY = bY + (bHeight - totalTextHeight) / 2 + lineHeight / 2;
+    }
 
     lines.forEach((l) => {
       ctx.fillText(l, textX, startY);
