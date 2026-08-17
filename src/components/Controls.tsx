@@ -159,9 +159,44 @@ export const Controls: React.FC<ControlsProps> = ({
               rows={3}
               value={settings.announcementText}
               onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm mb-3"
               placeholder="e.g. Enter your heading"
             />
+            
+            <div className="bg-indigo-50/50 dark:bg-slate-800/80 p-3 rounded-xl border border-indigo-100 dark:border-slate-700 space-y-3">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium leading-tight">
+                <span className="font-bold text-indigo-600 dark:text-indigo-400">Pro Tip:</span> Highlight words by adding <code className="bg-white dark:bg-slate-700 px-1 py-0.5 rounded text-indigo-600 dark:text-indigo-300">$</code> before a word for a gradient, or <code className="bg-white dark:bg-slate-700 px-1 py-0.5 rounded text-blue-600 dark:text-blue-300">_</code> for a solid color!
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 truncate" title="Gradient Start ($)">Grad Start ($)</label>
+                  <input
+                    type="color"
+                    value={settings.highlightGradient1 || "#10b981"}
+                    onChange={(e) => setSettings({ ...settings, highlightGradient1: e.target.value })}
+                    className="w-full h-7 rounded cursor-pointer border border-slate-200 dark:border-slate-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 truncate" title="Gradient End ($)">Grad End ($)</label>
+                  <input
+                    type="color"
+                    value={settings.highlightGradient2 || "#059669"}
+                    onChange={(e) => setSettings({ ...settings, highlightGradient2: e.target.value })}
+                    className="w-full h-7 rounded cursor-pointer border border-slate-200 dark:border-slate-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 truncate" title="Solid Color (_)">Solid Color (_)</label>
+                  <input
+                    type="color"
+                    value={settings.highlightColor || "#3b82f6"}
+                    onChange={(e) => setSettings({ ...settings, highlightColor: e.target.value })}
+                    className="w-full h-7 rounded cursor-pointer border border-slate-200 dark:border-slate-600"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -216,6 +251,44 @@ export const Controls: React.FC<ControlsProps> = ({
                   setSettings({ ...settings, bannerHeight: Number(e.target.value) })
                 }
                 className="w-full accent-purple-600"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 flex justify-between">
+                <span>Text Vertical Position</span>
+                <span className="font-bold text-purple-600 dark:text-purple-400">{settings.textOffsetY > 0 ? `+${settings.textOffsetY}` : settings.textOffsetY}px</span>
+              </label>
+              <input
+                type="range"
+                min="-100"
+                max="100"
+                value={settings.textOffsetY}
+                onChange={(e) =>
+                  setSettings({ ...settings, textOffsetY: Number(e.target.value) })
+                }
+                className="w-full accent-purple-600"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 flex justify-between">
+                <span>Text Max Width</span>
+                <span className="font-bold text-purple-600 dark:text-purple-400">{settings.textMaxWidth === 0 ? "Auto" : `${settings.textMaxWidth}px`}</span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="1000"
+                step="10"
+                value={settings.textMaxWidth}
+                onChange={(e) =>
+                  setSettings({ ...settings, textMaxWidth: Number(e.target.value) })
+                }
+                className="w-full accent-purple-600"
+                title="Set to 0 for automatic width"
               />
             </div>
           </div>
@@ -501,10 +574,14 @@ export const Controls: React.FC<ControlsProps> = ({
             <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3">
               Poster Layout
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
               {/* Option 1: Classic (Bottom Banner) */}
               <button
-                onClick={() => setSettings({ ...settings, layoutMode: "classic" })}
+                onClick={() => {
+                  const nextSettings = { ...settings, layoutMode: "classic" as const };
+                  if (nextSettings.bgType === "reference") nextSettings.bgType = "gradient";
+                  setSettings(nextSettings);
+                }}
                 className={`flex flex-col items-center justify-between p-3 rounded-xl border transition-all text-center ${
                   !settings.layoutMode || settings.layoutMode === "classic"
                     ? "border-purple-600 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/20"
@@ -522,7 +599,11 @@ export const Controls: React.FC<ControlsProps> = ({
 
               {/* Option 2: Left Image, Right Text */}
               <button
-                onClick={() => setSettings({ ...settings, layoutMode: "left-image" })}
+                onClick={() => {
+                  const nextSettings = { ...settings, layoutMode: "left-image" as const };
+                  if (nextSettings.bgType === "reference") nextSettings.bgType = "gradient";
+                  setSettings(nextSettings);
+                }}
                 className={`flex flex-col items-center justify-between p-3 rounded-xl border transition-all text-center ${
                   settings.layoutMode === "left-image"
                     ? "border-purple-600 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/20"
@@ -546,7 +627,11 @@ export const Controls: React.FC<ControlsProps> = ({
 
               {/* Option 3: Right Image, Left Text */}
               <button
-                onClick={() => setSettings({ ...settings, layoutMode: "right-image" })}
+                onClick={() => {
+                  const nextSettings = { ...settings, layoutMode: "right-image" as const };
+                  if (nextSettings.bgType === "reference") nextSettings.bgType = "gradient";
+                  setSettings(nextSettings);
+                }}
                 className={`flex flex-col items-center justify-between p-3 rounded-xl border transition-all text-center ${
                   settings.layoutMode === "right-image"
                     ? "border-purple-600 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/20"
@@ -565,6 +650,65 @@ export const Controls: React.FC<ControlsProps> = ({
                 </div>
                 <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
                   Right Image
+                </span>
+              </button>
+
+              {/* Option 3.5: Clean Split Left Text */}
+              <button
+                onClick={() => {
+                  setSettings({
+                    ...settings,
+                    layoutMode: "split-clean-left",
+                    textAlignment: "left",
+                    bgType: "split-clean-template"
+                  });
+                }}
+                className={`flex flex-col items-center justify-between p-3 rounded-xl border transition-all text-center ${
+                  settings.layoutMode === "split-clean-left"
+                    ? "border-purple-600 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/20"
+                    : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-slate-400"
+                }`}
+              >
+                <div className="w-full aspect-[16/10] bg-slate-200 dark:bg-slate-700 rounded-lg flex p-1 border border-slate-300 dark:border-slate-600 gap-1 mb-2">
+                  <div className="w-1/2 h-full flex flex-col justify-center gap-1.5 p-1">
+                    <div className="w-full h-1.5 bg-slate-700 dark:bg-slate-300 rounded-xs" />
+                    <div className="w-2/3 h-1.5 bg-slate-700 dark:bg-slate-300 rounded-xs" />
+                    <div className="w-full h-1 bg-slate-500 dark:bg-slate-400 rounded-xs mt-1" />
+                    <div className="w-4/5 h-1 bg-slate-500 dark:bg-slate-400 rounded-xs" />
+                  </div>
+                  <div className="w-1/2 h-full bg-slate-400 dark:bg-slate-500 rounded flex items-end justify-center">
+                    <div className="w-2/3 h-4/5 bg-slate-500 dark:bg-slate-600 rounded-t" />
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                  Clean Split
+                </span>
+              </button>
+
+              {/* Option 4: Reference Template Layout */}
+              <button
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    layoutMode: "circle-banner",
+                    bgType: "reference",
+                  })
+                }
+                className={`flex flex-col items-center justify-between p-2.5 rounded-xl border transition-all text-center ${
+                  settings.layoutMode === "circle-banner" || settings.bgType === "reference"
+                    ? "border-purple-600 bg-purple-500/10 shadow-sm ring-2 ring-purple-500/20"
+                    : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-slate-400"
+                }`}
+              >
+                <div className="w-full aspect-[5/4] rounded-lg overflow-hidden border border-slate-300 dark:border-slate-600 mb-2 shadow-xs bg-slate-100">
+                  <img
+                    src="/templates/poster-layout-1.png"
+                    alt="Reference Poster Layout"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                  Reference Layout
                 </span>
               </button>
             </div>
