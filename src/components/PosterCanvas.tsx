@@ -4,7 +4,17 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 
 export interface PosterCanvasSettings {
   // Layout mode
-  layoutMode?: "classic" | "left-image" | "right-image" | "circle-banner" | "split-clean-left";
+  layoutMode?: "classic" | "left-image" | "right-image" | "circle-banner" | "split-clean-left" | "dual-logo";
+  // Logos
+  showLeftLogo?: boolean;
+  leftLogoUrl?: string;
+  leftLogoSize?: number;
+  showRightLogo?: boolean;
+  rightLogoUrl?: string;
+  rightLogoSize?: number;
+  logoSize?: number;
+  logoPaddingX?: number;
+  logoPaddingY?: number;
   // Text content
   announcementText: string;
   // Typography
@@ -69,6 +79,12 @@ export const PosterCanvas: React.FC<PosterCanvasProps> = ({
   const referenceImgRef = useRef<HTMLImageElement | null>(null);
   const [refImageLoaded, setRefImageLoaded] = useState(false);
 
+  // Left and Right Header Logos
+  const leftLogoImgRef = useRef<HTMLImageElement | null>(null);
+  const [leftLogoLoaded, setLeftLogoLoaded] = useState(false);
+  const rightLogoImgRef = useRef<HTMLImageElement | null>(null);
+  const [rightLogoLoaded, setRightLogoLoaded] = useState(false);
+
   const [isDrawingEraser, setIsDrawingEraser] = useState(false);
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
 
@@ -81,6 +97,48 @@ export const PosterCanvas: React.FC<PosterCanvasProps> = ({
       setRefImageLoaded(true);
     };
   }, []);
+
+  // Load Left Logo (default: /templates/logo.png)
+  const leftUrl = settings.leftLogoUrl !== undefined ? settings.leftLogoUrl : "/templates/logo.png";
+  useEffect(() => {
+    if (!leftUrl) {
+      leftLogoImgRef.current = null;
+      setLeftLogoLoaded(false);
+      return;
+    }
+    setLeftLogoLoaded(false);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      leftLogoImgRef.current = img;
+      setLeftLogoLoaded(true);
+    };
+    img.onerror = () => {
+      setLeftLogoLoaded(false);
+    };
+    img.src = leftUrl;
+  }, [leftUrl]);
+
+  // Load Right Logo (dynamic upload)
+  const rightUrl = settings.rightLogoUrl;
+  useEffect(() => {
+    if (!rightUrl) {
+      rightLogoImgRef.current = null;
+      setRightLogoLoaded(false);
+      return;
+    }
+    setRightLogoLoaded(false);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      rightLogoImgRef.current = img;
+      setRightLogoLoaded(true);
+    };
+    img.onerror = () => {
+      setRightLogoLoaded(false);
+    };
+    img.src = rightUrl;
+  }, [rightUrl]);
 
   // Initialize offscreen eraser mask canvas
   useEffect(() => {
@@ -552,7 +610,64 @@ export const PosterCanvas: React.FC<PosterCanvasProps> = ({
     });
 
     ctx.restore();
-  }, [settings, imageLoaded, refImageLoaded]);
+
+    // 7. DRAW TOP LOGOS (LEFT & RIGHT) - Exclusively on Dual-Logo template
+    if (settings.layoutMode === "dual-logo") {
+      const showLeft = settings.showLeftLogo !== false;
+      const showRight = settings.showRightLogo !== false && !!settings.rightLogoUrl;
+
+      const targetLeftLogoHeight = settings.leftLogoSize || settings.logoSize || 85;
+      const targetRightLogoHeight = settings.rightLogoSize || settings.logoSize || 85;
+      const maxLeftLogoWidth = targetLeftLogoHeight * 3.5;
+      const maxRightLogoWidth = targetRightLogoHeight * 3.5;
+      const paddingX = settings.logoPaddingX || 60;
+      const paddingY = settings.logoPaddingY || 45;
+
+      ctx.save();
+
+      // Draw Left Logo (Default Public Logo or Custom)
+      if (showLeft && leftLogoImgRef.current && leftLogoLoaded) {
+        const lImg = leftLogoImgRef.current;
+        const lAspect = (lImg.naturalWidth || lImg.width) / (lImg.naturalHeight || lImg.height);
+        let lH = targetLeftLogoHeight;
+        let lW = lH * lAspect;
+        if (lW > maxLeftLogoWidth) {
+          lW = maxLeftLogoWidth;
+          lH = lW / lAspect;
+        }
+        const lX = paddingX;
+        const lY = paddingY + (targetLeftLogoHeight - lH) / 2;
+
+        ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 2;
+        ctx.drawImage(lImg, lX, lY, lW, lH);
+        ctx.shadowColor = "transparent";
+      }
+
+      // Draw Right Logo (Dynamic Uploaded Partner Logo)
+      if (showRight && rightLogoImgRef.current && rightLogoLoaded) {
+        const rImg = rightLogoImgRef.current;
+        const rAspect = (rImg.naturalWidth || rImg.width) / (rImg.naturalHeight || rImg.height);
+        let rH = targetRightLogoHeight;
+        let rW = rH * rAspect;
+        if (rW > maxRightLogoWidth) {
+          rW = maxRightLogoWidth;
+          rH = rW / rAspect;
+        }
+        const rX = width - paddingX - rW;
+        const rY = paddingY + (targetRightLogoHeight - rH) / 2;
+
+        ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 2;
+        ctx.drawImage(rImg, rX, rY, rW, rH);
+        ctx.shadowColor = "transparent";
+      }
+
+      ctx.restore();
+    }
+  }, [settings, imageLoaded, refImageLoaded, leftLogoLoaded, rightLogoLoaded]);
 
   useEffect(() => {
     drawPoster();
