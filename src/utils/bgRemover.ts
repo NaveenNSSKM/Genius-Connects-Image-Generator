@@ -334,3 +334,111 @@ async function removeBackgroundFallback(imageSource: File | Blob | string): Prom
     }
   });
 }
+
+/**
+ * Specialized background remover for logos:
+ * Removes white, off-white, light-gray, or uniform solid corner background boxes
+ * surrounding logo text/graphics while preserving logo colors perfectly.
+ */
+export async function removeLogoWhiteBackground(
+  imageSource: File | Blob | string,
+  tolerance: number = 55
+): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        resolve(typeof imageSource === "string" ? imageSource : URL.createObjectURL(imageSource as Blob));
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imgData.data;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Sample 6 points to detect background color (corners + edge centers)
+      const samplePoints = [
+        [0, 0],
+        [w - 1, 0],
+        [0, h - 1],
+        [w - 1, h - 1],
+        [Math.floor(w / 2), 0],
+        [Math.floor(w / 2), h - 1],
+      ];
+
+      let sumR = 0, sumG = 0, sumB = 0, count = 0;
+      samplePoints.forEach(([cx, cy]) => {
+        const idx = (cy * w + cx) * 4;
+        sumR += data[idx];
+        sumG += data[idx + 1];
+        sumB += data[idx + 2];
+        count++;
+      });
+
+      const bgR = Math.round(sumR / count);
+      const bgG = Math.round(sumG / count);
+      const bgB = Math.round(sumB / count);
+      const isBgLight = (bgR + bgG + bgB) / 3 > 150;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+
+        if (a === 0) continue;
+
+        const brightness = (r + g + b) / 3;
+
+        // Distance from sampled background color
+        const colorDiff = Math.sqrt(
+          Math.pow(r - bgR, 2) + Math.pow(g - bgG, 2) + Math.pow(b - bgB, 2)
+        );
+
+        // Near-white or light gray check (covers RGB values > 190 with low color variance)
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const saturation = maxC - minC;
+        const isNearWhiteOrLightGray = brightness > 190 && saturation < 35;
+        const isNearCornerBg = colorDiff < tolerance;
+
+        if (isNearCornerBg || (isBgLight && isNearWhiteOrLightGray)) {
+          if (colorDiff < tolerance * 0.75 || (isNearWhiteOrLightGray && brightness > 215)) {
+            data[i + 3] = 0; // Fully transparent
+          } else {
+            // Anti-aliased smooth edge transition
+            const fade = (colorDiff - tolerance * 0.75) / (tolerance * 0.25);
+            data[i + 3] = Math.max(0, Math.min(a, Math.floor(a * fade)));
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(URL.createObjectURL(blob));
+        } else {
+          resolve(typeof imageSource === "string" ? imageSource : URL.createObjectURL(imageSource as Blob));
+        }
+      }, "image/png");
+    };
+
+    img.onerror = () => {
+      resolve(typeof imageSource === "string" ? imageSource : URL.createObjectURL(imageSource as Blob));
+    };
+
+    if (typeof imageSource === "string") {
+      img.src = imageSource;
+    } else {
+      img.src = URL.createObjectURL(imageSource as Blob);
+    }
+  });
+}

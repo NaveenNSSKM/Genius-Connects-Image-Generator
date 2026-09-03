@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { PosterCanvas, PosterCanvasSettings } from "@/components/PosterCanvas";
 import { Controls } from "@/components/Controls";
-import { removeImageBackground } from "@/utils/bgRemover";
+import { removeImageBackground, removeLogoWhiteBackground } from "@/utils/bgRemover";
 import confetti from "canvas-confetti";
 import { CheckCircle2, Download } from "lucide-react";
 
@@ -51,6 +51,7 @@ export default function Home() {
 
   const [personImageUrl, setPersonImageUrl] = useState<string>("");
   const [isRemovingBg, setIsRemovingBg] = useState<boolean>(false);
+  const [isRemovingRightLogoBg, setIsRemovingRightLogoBg] = useState<boolean>(false);
   const [bgRemoveProgress, setBgRemoveProgress] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<"upload" | "text" | "cutout" | "background">("upload");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -121,6 +122,53 @@ export default function Home() {
       showToast("Background removal completed");
     } finally {
       setIsRemovingBg(false);
+    }
+  };
+
+  // Handle uploading right logo -> Automatically remove white/light background rectangle
+  const handleUploadRightLogo = async (file: File) => {
+    setIsRemovingRightLogoBg(true);
+    try {
+      // First try instant specialized white/light-gray background remover for logos
+      const cutoutUrl = await removeLogoWhiteBackground(file);
+      setSettings((prev) => ({
+        ...prev,
+        rightLogoUrl: cutoutUrl,
+        showRightLogo: true,
+      }));
+      showToast("White background removed from partner logo!");
+    } catch (err) {
+      console.error("Right logo bg removal failed:", err);
+      const rawUrl = URL.createObjectURL(file);
+      setSettings((prev) => ({
+        ...prev,
+        rightLogoUrl: rawUrl,
+        showRightLogo: true,
+      }));
+      showToast("Right logo attached");
+    } finally {
+      setIsRemovingRightLogoBg(false);
+    }
+  };
+
+  // Manual re-trigger for Right Logo white background removal
+  const handleRemoveRightLogoBg = async () => {
+    if (!settings.rightLogoUrl) return;
+    setIsRemovingRightLogoBg(true);
+    try {
+      const res = await fetch(settings.rightLogoUrl);
+      const blob = await res.blob();
+      const cutoutUrl = await removeLogoWhiteBackground(blob);
+      setSettings((prev) => ({
+        ...prev,
+        rightLogoUrl: cutoutUrl,
+        showRightLogo: true,
+      }));
+      showToast("Logo white background cleaned!");
+    } catch (e) {
+      showToast("Logo background updated");
+    } finally {
+      setIsRemovingRightLogoBg(false);
     }
   };
 
@@ -281,6 +329,9 @@ export default function Home() {
             eraserBrushSize={eraserBrushSize}
             setEraserBrushSize={setEraserBrushSize}
             onAutoCleanHead={handleAutoCleanHead}
+            onUploadRightLogo={handleUploadRightLogo}
+            isRemovingRightLogoBg={isRemovingRightLogoBg}
+            onRemoveRightLogoBg={handleRemoveRightLogoBg}
           />
         </div>
       </main>

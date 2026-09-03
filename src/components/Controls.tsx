@@ -2,6 +2,7 @@
 
 import React from "react";
 import { PosterCanvasSettings } from "./PosterCanvas";
+import { removeLogoWhiteBackground } from "@/utils/bgRemover";
 import {
   Upload,
   Wand2,
@@ -42,6 +43,9 @@ interface ControlsProps {
   eraserBrushSize: number;
   setEraserBrushSize: (val: number) => void;
   onAutoCleanHead?: () => void;
+  onUploadRightLogo?: (file: File) => void;
+  isRemovingRightLogoBg?: boolean;
+  onRemoveRightLogoBg?: () => void;
 }
 
 export const Controls: React.FC<ControlsProps> = ({
@@ -59,6 +63,9 @@ export const Controls: React.FC<ControlsProps> = ({
   eraserBrushSize,
   setEraserBrushSize,
   onAutoCleanHead,
+  onUploadRightLogo,
+  isRemovingRightLogoBg = false,
+  onRemoveRightLogoBg,
 }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -66,10 +73,16 @@ export const Controls: React.FC<ControlsProps> = ({
     }
   };
 
-  const handleLeftLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLeftLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const url = URL.createObjectURL(e.target.files[0]);
-      setSettings((prev) => ({ ...prev, leftLogoUrl: url, showLeftLogo: true }));
+      const file = e.target.files[0];
+      try {
+        const url = await removeLogoWhiteBackground(file);
+        setSettings((prev) => ({ ...prev, leftLogoUrl: url, showLeftLogo: true }));
+      } catch (err) {
+        const url = URL.createObjectURL(file);
+        setSettings((prev) => ({ ...prev, leftLogoUrl: url, showLeftLogo: true }));
+      }
     }
   };
 
@@ -79,8 +92,13 @@ export const Controls: React.FC<ControlsProps> = ({
 
   const handleRightLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const url = URL.createObjectURL(e.target.files[0]);
-      setSettings((prev) => ({ ...prev, rightLogoUrl: url, showRightLogo: true }));
+      const file = e.target.files[0];
+      if (onUploadRightLogo) {
+        onUploadRightLogo(file);
+      } else {
+        const url = URL.createObjectURL(file);
+        setSettings((prev) => ({ ...prev, rightLogoUrl: url, showRightLogo: true }));
+      }
     }
   };
 
@@ -178,9 +196,9 @@ export const Controls: React.FC<ControlsProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  Top-Right Partner Logo (Optional)
+                  Top-Right Partner Logo (Auto BG Removal)
                 </span>
-                {settings.rightLogoUrl && (
+                {settings.rightLogoUrl && !isRemovingRightLogoBg && (
                   <button
                     onClick={handleRemoveRightLogo}
                     className="text-[11px] text-rose-500 hover:text-rose-700 font-semibold"
@@ -195,9 +213,14 @@ export const Controls: React.FC<ControlsProps> = ({
                   accept="image/*"
                   className="hidden"
                   onChange={handleRightLogoChange}
+                  disabled={isRemovingRightLogoBg}
                 />
                 <div className="flex items-center gap-2.5">
-                  {settings.rightLogoUrl ? (
+                  {isRemovingRightLogoBg ? (
+                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/60 text-purple-600 flex items-center justify-center animate-spin">
+                      <Wand2 className="w-4 h-4" />
+                    </div>
+                  ) : settings.rightLogoUrl ? (
                     <img
                       src={settings.rightLogoUrl}
                       alt="Partner Logo"
@@ -210,15 +233,23 @@ export const Controls: React.FC<ControlsProps> = ({
                   )}
                   <div>
                     <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                      {settings.rightLogoUrl ? "Partner Logo Attached" : "Upload Top-Right Partner Logo"}
+                      {isRemovingRightLogoBg
+                        ? "Removing Background..."
+                        : settings.rightLogoUrl
+                        ? "Partner Logo Attached (Transparent)"
+                        : "Upload Top-Right Partner Logo"}
                     </p>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                      {settings.rightLogoUrl ? "Click to replace logo" : "PNG with transparent background recommended"}
+                      {isRemovingRightLogoBg
+                        ? "AI is extracting transparent logo cutout..."
+                        : settings.rightLogoUrl
+                        ? "Click to change logo"
+                        : "Background will be removed automatically"}
                     </p>
                   </div>
                 </div>
                 <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 group-hover:underline">
-                  {settings.rightLogoUrl ? "Change" : "Browse"}
+                  {isRemovingRightLogoBg ? "Processing..." : settings.rightLogoUrl ? "Change" : "Browse"}
                 </span>
               </label>
             </div>
@@ -646,12 +677,402 @@ export const Controls: React.FC<ControlsProps> = ({
       {/* TAB 4: TEMPLATE & BACKGROUND STYLING */}
       {activeTab === "background" && (
         <div className="space-y-6 animate-fade-in">
-          {/* Poster Layout Options */}
+          {/* HEADER LOGOS & BRANDING (LEFT & RIGHT) - NOW AT TOP */}
+          <div className="p-4 bg-purple-50/40 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-800/50 rounded-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Building2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  Header Logos & Movable Alignment
+                </label>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Individually adjust size and X/Y positions for Left (default) & Right logos.
+                </p>
+              </div>
+              {(settings.leftLogoOffsetX || settings.leftLogoOffsetY || settings.rightLogoOffsetX || settings.rightLogoOffsetY) ? (
+                <button
+                  onClick={() =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      leftLogoOffsetX: 0,
+                      leftLogoOffsetY: 0,
+                      rightLogoOffsetX: 0,
+                      rightLogoOffsetY: 0,
+                    }))
+                  }
+                  className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/40 px-2 py-1 rounded-lg hover:bg-purple-200 transition-colors flex items-center gap-1"
+                  title="Reset both logos to default positions"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset All Positions</span>
+                </button>
+              ) : null}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Left Logo Card */}
+              <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                    Left Logo (Public Default)
+                  </span>
+                  <button
+                    onClick={() =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        showLeftLogo: prev.showLeftLogo !== false ? false : true,
+                      }))
+                    }
+                    title={settings.showLeftLogo !== false ? "Hide Left Logo" : "Show Left Logo"}
+                    className="text-slate-500 hover:text-purple-600 p-1 rounded-md transition-colors"
+                  >
+                    {settings.showLeftLogo !== false ? (
+                      <Eye className="w-3.5 h-3.5 text-purple-600" />
+                    ) : (
+                      <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+                    )}
+                  </button>
+                </div>
+
+                <div className="h-14 bg-slate-50 dark:bg-slate-900/60 rounded-lg flex items-center justify-center p-2 border border-slate-100 dark:border-slate-800 relative group overflow-hidden">
+                  <img
+                    src={settings.leftLogoUrl || "/templates/logo.png"}
+                    alt="Left Logo"
+                    className="max-h-full max-w-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
+                </div>
+
+                <div className="flex items-center gap-1.5 pt-1">
+                  <label className="flex-1 text-center bg-slate-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-300 text-[11px] font-semibold py-1 px-2 rounded-lg cursor-pointer transition-colors truncate">
+                    <span>Change</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLeftLogoChange}
+                    />
+                  </label>
+                  {settings.leftLogoUrl && settings.leftLogoUrl !== "/templates/logo.png" && (
+                    <button
+                      onClick={handleResetLeftLogo}
+                      title="Reset to Public Logo"
+                      className="p-1 text-slate-500 hover:text-purple-600 bg-slate-100 dark:bg-slate-700 rounded-lg transition-colors"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Logo Card */}
+              <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                    Right Logo (Dynamic Partner)
+                  </span>
+                  {settings.rightLogoUrl && !isRemovingRightLogoBg && (
+                    <button
+                      onClick={() =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          showRightLogo: prev.showRightLogo !== false ? false : true,
+                        }))
+                      }
+                      title={settings.showRightLogo !== false ? "Hide Right Logo" : "Show Right Logo"}
+                      className="text-slate-500 hover:text-purple-600 p-1 rounded-md transition-colors"
+                    >
+                      {settings.showRightLogo !== false ? (
+                        <Eye className="w-3.5 h-3.5 text-purple-600" />
+                      ) : (
+                        <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {isRemovingRightLogoBg ? (
+                  <div className="h-14 bg-purple-50 dark:bg-purple-950/40 rounded-lg flex flex-col items-center justify-center p-2 border border-purple-200 dark:border-purple-800 text-purple-600 animate-pulse">
+                    <Wand2 className="w-5 h-5 animate-spin mb-1" />
+                    <span className="text-[10px] font-semibold">Removing Background...</span>
+                  </div>
+                ) : settings.rightLogoUrl ? (
+                  <>
+                    <div className="h-14 bg-slate-50 dark:bg-slate-900/60 rounded-lg flex items-center justify-center p-2 border border-slate-100 dark:border-slate-800 overflow-hidden relative">
+                      <img
+                        src={settings.rightLogoUrl}
+                        alt="Right Logo"
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <label className="flex-1 text-center bg-slate-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-300 text-[11px] font-semibold py-1 px-2 rounded-lg cursor-pointer transition-colors truncate">
+                        <span>Change</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleRightLogoChange}
+                        />
+                      </label>
+                      {onRemoveRightLogoBg && (
+                        <button
+                          onClick={onRemoveRightLogoBg}
+                          title="Re-run AI Background Remover"
+                          className="p-1.5 text-purple-600 hover:text-purple-800 bg-purple-100 dark:bg-purple-900/40 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-semibold"
+                        >
+                          <Wand2 className="w-3.5 h-3.5" />
+                          <span>Clean BG</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={handleRemoveRightLogo}
+                        title="Remove Right Logo"
+                        className="p-1 text-rose-500 hover:text-rose-700 bg-rose-50 dark:bg-rose-950/40 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <label className="h-[92px] border-2 border-dashed border-purple-300 dark:border-purple-700/60 hover:border-purple-500 bg-purple-50/30 dark:bg-purple-950/20 hover:bg-purple-50/60 rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-all text-center group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleRightLogoChange}
+                    />
+                    <Upload className="w-4 h-4 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform mb-1" />
+                    <span className="text-[11px] font-bold text-purple-900 dark:text-purple-300 leading-tight">
+                      + Upload Partner Logo
+                    </span>
+                    <span className="text-[9px] text-purple-600 dark:text-purple-400 font-medium mt-0.5">
+                      Auto BG Removal Enabled
+                    </span>
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Individual Logo Sizing Controls */}
+            <div className="pt-2 border-t border-purple-100 dark:border-purple-900/40 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                  Logo Sizes
+                </span>
+                <button
+                  onClick={() => {
+                    const currentLeft = settings.leftLogoSize || settings.logoSize || 85;
+                    setSettings((prev) => ({
+                      ...prev,
+                      leftLogoSize: currentLeft,
+                      rightLogoSize: currentLeft,
+                      logoSize: currentLeft,
+                    }));
+                  }}
+                  className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-100/70 dark:bg-purple-900/40 px-2 py-0.5 rounded-md hover:bg-purple-200 transition-colors"
+                  title="Make Left and Right logos exact same size"
+                >
+                  Sync Both Sizes
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <span>Left Logo Size</span>
+                    <span className="font-bold text-purple-600 dark:text-purple-400">{settings.leftLogoSize || settings.logoSize || 85}px</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="30"
+                    max="260"
+                    step="2"
+                    value={settings.leftLogoSize || settings.logoSize || 85}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setSettings((prev) => ({ ...prev, leftLogoSize: val }));
+                    }}
+                    className="w-full accent-purple-600 cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <span>Right Logo Size</span>
+                    <span className="font-bold text-purple-600 dark:text-purple-400">{settings.rightLogoSize || settings.logoSize || 85}px</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="30"
+                    max="260"
+                    step="2"
+                    value={settings.rightLogoSize || settings.logoSize || 85}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setSettings((prev) => ({ ...prev, rightLogoSize: val }));
+                    }}
+                    className="w-full accent-purple-600 cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Individual Logo Movable Positioning Controls */}
+            <div className="pt-3 border-t border-purple-100 dark:border-purple-900/40 space-y-4">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider block">
+                Individual Movable Logo Alignment (X/Y Offsets)
+              </span>
+
+              {/* Left Logo Movable Position Controls */}
+              <div className="p-3 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                    <MoveHorizontal className="w-3.5 h-3.5 text-indigo-500" />
+                    Left Logo Position
+                  </span>
+                  {(settings.leftLogoOffsetX || settings.leftLogoOffsetY) ? (
+                    <button
+                      onClick={() =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          leftLogoOffsetX: 0,
+                          leftLogoOffsetY: 0,
+                        }))
+                      }
+                      className="text-[10px] font-semibold text-slate-500 hover:text-indigo-600 flex items-center gap-0.5"
+                    >
+                      <RotateCcw className="w-3 h-3" /> Reset Left
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1">
+                      <span>Horizontal (X)</span>
+                      <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                        {settings.leftLogoOffsetX || 0}px
+                      </span>
+                    </label>
+                    <input
+                      type="range"
+                      min="-200"
+                      max="600"
+                      step="5"
+                      value={settings.leftLogoOffsetX || 0}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setSettings((prev) => ({ ...prev, leftLogoOffsetX: val }));
+                      }}
+                      className="w-full accent-indigo-600 cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1">
+                      <span>Vertical (Y)</span>
+                      <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                        {settings.leftLogoOffsetY || 0}px
+                      </span>
+                    </label>
+                    <input
+                      type="range"
+                      min="-100"
+                      max="400"
+                      step="5"
+                      value={settings.leftLogoOffsetY || 0}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setSettings((prev) => ({ ...prev, leftLogoOffsetY: val }));
+                      }}
+                      className="w-full accent-indigo-600 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Logo Movable Position Controls */}
+              <div className="p-3 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                    <MoveHorizontal className="w-3.5 h-3.5 text-purple-500" />
+                    Right Logo Position
+                  </span>
+                  {(settings.rightLogoOffsetX || settings.rightLogoOffsetY) ? (
+                    <button
+                      onClick={() =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          rightLogoOffsetX: 0,
+                          rightLogoOffsetY: 0,
+                        }))
+                      }
+                      className="text-[10px] font-semibold text-slate-500 hover:text-purple-600 flex items-center gap-0.5"
+                    >
+                      <RotateCcw className="w-3 h-3" /> Reset Right
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1">
+                      <span>Horizontal (X)</span>
+                      <span className="font-semibold text-purple-600 dark:text-purple-400">
+                        {settings.rightLogoOffsetX || 0}px
+                      </span>
+                    </label>
+                    <input
+                      type="range"
+                      min="-600"
+                      max="200"
+                      step="5"
+                      value={settings.rightLogoOffsetX || 0}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setSettings((prev) => ({ ...prev, rightLogoOffsetX: val }));
+                      }}
+                      className="w-full accent-purple-600 cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 mb-1">
+                      <span>Vertical (Y)</span>
+                      <span className="font-semibold text-purple-600 dark:text-purple-400">
+                        {settings.rightLogoOffsetY || 0}px
+                      </span>
+                    </label>
+                    <input
+                      type="range"
+                      min="-100"
+                      max="400"
+                      step="5"
+                      value={settings.rightLogoOffsetY || 0}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setSettings((prev) => ({ ...prev, rightLogoOffsetY: val }));
+                      }}
+                      className="w-full accent-purple-600 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 pt-2">
+              💡 Tip: Use Horizontal (X) and Vertical (Y) sliders to freely position both Left (default) and Right logos anywhere on top of your poster!
+            </p>
+          </div>
+
+          {/* POSTER LAYOUT OPTIONS - 3 per row (3 + 3 = 6 items total) */}
           <div>
             <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3">
               Poster Layout
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+            <div className="grid grid-cols-3 gap-3">
               {/* Option 0: Dual Logo Template (Reference Layout Pattern with Dynamic Logos) */}
               <button
                 onClick={() => {
@@ -825,220 +1246,6 @@ export const Controls: React.FC<ControlsProps> = ({
                   Reference Layout
                 </span>
               </button>
-            </div>
-          </div>
-
-          {/* HEADER LOGOS & BRANDING (LEFT & RIGHT) */}
-          <div className="p-4 bg-purple-50/40 dark:bg-purple-950/20 border border-purple-200/80 dark:border-purple-800/50 rounded-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="block text-xs font-bold text-purple-900 dark:text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Building2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  Header Logos (Equal Sizing)
-                </label>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Top-left public logo & top-right dynamic partner logo.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Left Logo Card */}
-              <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                    Left Logo (Public Default)
-                  </span>
-                  <button
-                    onClick={() =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        showLeftLogo: prev.showLeftLogo !== false ? false : true,
-                      }))
-                    }
-                    title={settings.showLeftLogo !== false ? "Hide Left Logo" : "Show Left Logo"}
-                    className="text-slate-500 hover:text-purple-600 p-1 rounded-md transition-colors"
-                  >
-                    {settings.showLeftLogo !== false ? (
-                      <Eye className="w-3.5 h-3.5 text-purple-600" />
-                    ) : (
-                      <EyeOff className="w-3.5 h-3.5 text-slate-400" />
-                    )}
-                  </button>
-                </div>
-
-                <div className="h-14 bg-slate-50 dark:bg-slate-900/60 rounded-lg flex items-center justify-center p-2 border border-slate-100 dark:border-slate-800 relative group overflow-hidden">
-                  <img
-                    src={settings.leftLogoUrl || "/templates/logo.png"}
-                    alt="Left Logo"
-                    className="max-h-full max-w-full object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = "none";
-                    }}
-                  />
-                </div>
-
-                <div className="flex items-center gap-1.5 pt-1">
-                  <label className="flex-1 text-center bg-slate-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-300 text-[11px] font-semibold py-1 px-2 rounded-lg cursor-pointer transition-colors truncate">
-                    <span>Change</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleLeftLogoChange}
-                    />
-                  </label>
-                  {settings.leftLogoUrl && settings.leftLogoUrl !== "/templates/logo.png" && (
-                    <button
-                      onClick={handleResetLeftLogo}
-                      title="Reset to Public Logo"
-                      className="p-1 text-slate-500 hover:text-purple-600 bg-slate-100 dark:bg-slate-700 rounded-lg transition-colors"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Logo Card */}
-              <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                    Right Logo (Dynamic Partner)
-                  </span>
-                  {settings.rightLogoUrl && (
-                    <button
-                      onClick={() =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          showRightLogo: prev.showRightLogo !== false ? false : true,
-                        }))
-                      }
-                      title={settings.showRightLogo !== false ? "Hide Right Logo" : "Show Right Logo"}
-                      className="text-slate-500 hover:text-purple-600 p-1 rounded-md transition-colors"
-                    >
-                      {settings.showRightLogo !== false ? (
-                        <Eye className="w-3.5 h-3.5 text-purple-600" />
-                      ) : (
-                        <EyeOff className="w-3.5 h-3.5 text-slate-400" />
-                      )}
-                    </button>
-                  )}
-                </div>
-
-                {settings.rightLogoUrl ? (
-                  <>
-                    <div className="h-14 bg-slate-50 dark:bg-slate-900/60 rounded-lg flex items-center justify-center p-2 border border-slate-100 dark:border-slate-800 overflow-hidden">
-                      <img
-                        src={settings.rightLogoUrl}
-                        alt="Right Logo"
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-                    <div className="flex items-center gap-1.5 pt-1">
-                      <label className="flex-1 text-center bg-slate-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-slate-700 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-300 text-[11px] font-semibold py-1 px-2 rounded-lg cursor-pointer transition-colors truncate">
-                        <span>Change</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleRightLogoChange}
-                        />
-                      </label>
-                      <button
-                        onClick={handleRemoveRightLogo}
-                        title="Remove Right Logo"
-                        className="p-1 text-rose-500 hover:text-rose-700 bg-rose-50 dark:bg-rose-950/40 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <label className="h-[92px] border-2 border-dashed border-purple-300 dark:border-purple-700/60 hover:border-purple-500 bg-purple-50/30 dark:bg-purple-950/20 hover:bg-purple-50/60 rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-all text-center group">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleRightLogoChange}
-                    />
-                    <Upload className="w-4 h-4 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform mb-1" />
-                    <span className="text-[11px] font-bold text-purple-900 dark:text-purple-300 leading-tight">
-                      + Upload Partner Logo
-                    </span>
-                    <span className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      PNG, SVG, JPG
-                    </span>
-                  </label>
-                )}
-              </div>
-            </div>
-
-            {/* Individual Logo Sizing Controls */}
-            <div className="pt-2 border-t border-purple-100 dark:border-purple-900/40 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  Logo Size Adjustments
-                </span>
-                <button
-                  onClick={() => {
-                    const currentLeft = settings.leftLogoSize || settings.logoSize || 85;
-                    setSettings((prev) => ({
-                      ...prev,
-                      leftLogoSize: currentLeft,
-                      rightLogoSize: currentLeft,
-                      logoSize: currentLeft,
-                    }));
-                  }}
-                  className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-100/70 dark:bg-purple-900/40 px-2 py-0.5 rounded-md hover:bg-purple-200 transition-colors"
-                  title="Make Left and Right logos exact same size"
-                >
-                  Sync Both Sizes
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    <span>Left Logo Size</span>
-                    <span className="font-bold text-purple-600 dark:text-purple-400">{settings.leftLogoSize || settings.logoSize || 85}px</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="30"
-                    max="260"
-                    step="2"
-                    value={settings.leftLogoSize || settings.logoSize || 85}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      setSettings((prev) => ({ ...prev, leftLogoSize: val }));
-                    }}
-                    className="w-full accent-purple-600 cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    <span>Right Logo Size</span>
-                    <span className="font-bold text-purple-600 dark:text-purple-400">{settings.rightLogoSize || settings.logoSize || 85}px</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="30"
-                    max="260"
-                    step="2"
-                    value={settings.rightLogoSize || settings.logoSize || 85}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      setSettings((prev) => ({ ...prev, rightLogoSize: val }));
-                    }}
-                    className="w-full accent-purple-600 cursor-pointer"
-                  />
-                </div>
-              </div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                💡 Tip: If one logo has text underneath and the other is just an icon, adjust their sliders individually to make their visual scale match perfectly!
-              </p>
             </div>
           </div>
 

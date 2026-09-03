@@ -9,9 +9,13 @@ export interface PosterCanvasSettings {
   showLeftLogo?: boolean;
   leftLogoUrl?: string;
   leftLogoSize?: number;
+  leftLogoOffsetX?: number;
+  leftLogoOffsetY?: number;
   showRightLogo?: boolean;
   rightLogoUrl?: string;
   rightLogoSize?: number;
+  rightLogoOffsetX?: number;
+  rightLogoOffsetY?: number;
   logoSize?: number;
   logoPaddingX?: number;
   logoPaddingY?: number;
@@ -635,8 +639,8 @@ export const PosterCanvas: React.FC<PosterCanvasProps> = ({
           lW = maxLeftLogoWidth;
           lH = lW / lAspect;
         }
-        const lX = paddingX;
-        const lY = paddingY + (targetLeftLogoHeight - lH) / 2;
+        const lX = paddingX + (settings.leftLogoOffsetX || 0);
+        const lY = paddingY + (targetLeftLogoHeight - lH) / 2 + (settings.leftLogoOffsetY || 0);
 
         ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
         ctx.shadowBlur = 6;
@@ -655,8 +659,8 @@ export const PosterCanvas: React.FC<PosterCanvasProps> = ({
           rW = maxRightLogoWidth;
           rH = rW / rAspect;
         }
-        const rX = width - paddingX - rW;
-        const rY = paddingY + (targetRightLogoHeight - rH) / 2;
+        const rX = width - paddingX - rW + (settings.rightLogoOffsetX || 0);
+        const rY = paddingY + (targetRightLogoHeight - rH) / 2 + (settings.rightLogoOffsetY || 0);
 
         ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
         ctx.shadowBlur = 6;
